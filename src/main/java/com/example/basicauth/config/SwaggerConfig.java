@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info=@Info(
-                title = "My Project",
-                description = "About Authentication",
+                title = "Employee Management",
+                description = "About Employee Managament",
                 version = "1.0",
                 contact=@Contact(
                         name = "Nuray Muxtarli",

@@ -5,7 +5,7 @@ import com.example.basicauth.model.RefreshToken;
 import com.example.basicauth.model.UserInfo;
 import com.example.basicauth.service.JwtService;
 import com.example.basicauth.service.RefreshTokenService;
-import com.example.basicauth.service.UserService;
+import com.example.basicauth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class AuthenticationController {
     private final RefreshTokenService refreshTokenService;
 
     private final JwtService jwtService;
-    private final UserService service;
+    private final AuthService service;
 
     @PostMapping("/signUp")
     public ResponseEntity<UserInfo> addNewUser(@RequestBody SignUpRequest request) {
@@ -51,7 +51,7 @@ public class AuthenticationController {
         }
     }
 
-    //accessde var refreshde ne??
+
     @PostMapping("/refreshToken")
     public JwtResponse refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         return refreshTokenService.findByToken(refreshTokenRequest.token())
