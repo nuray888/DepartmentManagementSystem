@@ -2,12 +2,8 @@ package com.example.basicauth.model;
 
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,10 +11,14 @@ import java.util.Set;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    @Column(unique = true)
     String name;
     String description;
     @OneToMany(fetch = FetchType.LAZY,cascade =  {CascadeType.PERSIST,CascadeType.REMOVE,CascadeType.DETACH},mappedBy = "department")
@@ -26,4 +26,6 @@ public class Department {
 
     @OneToOne(fetch = FetchType.LAZY)
     UserInfo manager;
+
+
 }
