@@ -1,4 +1,16 @@
 package com.example.basicauth.service;
 
+import com.example.basicauth.dto.*;
+
 public interface AuthService {
+    UserResponseDto signup(SignUpRequest request);
+    JwtResponse verifyEmail(String token);
+    JwtResponse refreshToken(RefreshTokenRequest refreshTokenRequest);
+    JwtResponse login(AuthRequest authRequest);
+    String changePassword(ChangePasswordDto request);
+    String forgotPassword(ForgotPasswordRequest request);
+    void sendVerification(String email);
+    String resetPassword(ResetPasswordRequest request);
+    void logout(String refreshToken);
+
 }

@@ -39,14 +39,29 @@ spring:
       mail.smtp.starttls.enable: true
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+
 mail: ${mail}
 server:
-  port: 8080
+  port: 8081
+
+admin:
+  name: ${admin.name}
+  surname: ${admin.surname}
+  password: ${admin.password}
+  email: ${admin.email}
+
+
+jwt:
+  access-token-expire-time: ${ONE_DAY}
+  refresh-token-expire-time: ${ONE_DAY}
+  secretKey: ${JWT_SECRET_KEY}
+
+
 

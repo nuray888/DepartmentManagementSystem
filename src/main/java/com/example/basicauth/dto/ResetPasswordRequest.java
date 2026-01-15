@@ -1,8 +1,10 @@
 package com.example.basicauth.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record ResetPasswordRequest(
         String token,
-        String newPassword
+        @NotBlank String newPassword
 ) {
 
 }

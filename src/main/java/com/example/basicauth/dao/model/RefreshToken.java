@@ -1,4 +1,4 @@
-package com.example.basicauth.model;
+package com.example.basicauth.dao.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

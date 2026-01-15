@@ -1,4 +1,4 @@
-package com.example.basicauth.model;
+package com.example.basicauth.dao.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -40,7 +40,7 @@ public class UserInfo {
     LocalDateTime createdDate;
     @LastModifiedDate
     LocalDateTime updatedDate;
-
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     Department department;
@@ -48,6 +48,18 @@ public class UserInfo {
     //token
     String resetToken;
     LocalDateTime resetTokenExpiry;
+    //email ucun
+    Boolean isEmailVerified;
+    String verificationToken;
     //oauth2
     String googleId;
+
+
+    @PrePersist
+    public void prePersist() {
+        this.isActive = true;
+        this.isDeleted = false;
+        this.createdDate = LocalDateTime.now();
+        this.updatedDate = LocalDateTime.now();
+    }
 }

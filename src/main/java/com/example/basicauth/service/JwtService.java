@@ -1,83 +1,128 @@
 package com.example.basicauth.service;
 
+import com.example.basicauth.dao.model.RefreshToken;
+import com.example.basicauth.dao.model.UserInfo;
+import com.example.basicauth.dao.repo.RefreshTokenRepository;
+import com.example.basicauth.dao.repo.UserInfoRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-@Component
+import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.util.*;
+
+@Slf4j
+@Service
 @RequiredArgsConstructor
 public class JwtService {
 
-    public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
-    private final UserInfoUserDetailsService userDetails;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserInfoRepository userInfoRepository;
 
+    @Value("${jwt.access-token-expire-time}")
+    private Long accessTokenExpireTime;
 
-    /*
-This method takes:
-- signinKey and Authority(user or admin)
-*/
-    private Key getSignKey() {
-        byte[] keyBytes= Decoders.BASE64.decode(SECRET);
-        return Keys.hmacShaKeyFor(keyBytes);
+    @Value("${jwt.refresh-token-expire-time}")
+    private Long refreshTokenExpireTime;
+
+    @Value("${jwt.secretKey}")
+    private String secretKey;
+
+    // ===========================
+    // JWT Access Token Methods
+    // ===========================
+    public String generateAccessToken(String email) {
+        return generateToken(email, accessTokenExpireTime);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-
-
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
+    private String generateToken(String username, long expireTime) {
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expireTime))
+                .signWith(getSecretKey(secretKey))
+                .compact();
     }
 
-
-    public String generateToken(String userName){
-        Map<String,Object> claims=new HashMap<>();
-        claims.put("role",userDetails.loadUserByUsername(userName).getAuthorities());
-        return createToken(claims,userName);
+    private SecretKey getSecretKey(String secretKey) {
+        byte[] decode = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(decode);
     }
 
+    public boolean isValidToken(String token) {
+        try {
+            return extractClaims(token).getExpiration().after(new Date());
+        } catch (Exception e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
+            return false;
+        }
+    }
 
+    public String extractEmail(String token) {
+        return extractClaims(token).getSubject();
+    }
 
+    private Claims extractClaims(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSecretKey(secretKey))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            throw new JwtException("Token is invalid");
+        }
+    }
+    public Collection<GrantedAuthority> extractAuthorities(Claims claims) {
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        if (claims.containsKey("authorities")) {
+            List<String> roles = (List<String>) claims.get("authorities");
+            for (String role : roles) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+            }
+        }
+        return authorities;
+    }
+
+    @Transactional
+    public RefreshToken createRefreshToken(String email) {
+        UserInfo user = userInfoRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        RefreshToken refreshToken;
+        Optional<RefreshToken> existing = refreshTokenRepository.findByUserInfo(user);
+        if (existing.isEmpty()) {
+            refreshToken = RefreshToken.builder()
+                    .userInfo(user)
+                    .token(UUID.randomUUID().toString())
+                    .expiryDate(Instant.now().plusSeconds(refreshTokenExpireTime / 1000))
+                    .build();
+        } else {
+            refreshToken = existing.get();
+            refreshToken.setExpiryDate(Instant.now().plusSeconds(refreshTokenExpireTime / 1000));
+        }
+
+        return refreshTokenRepository.save(refreshToken);
+    }
+    public Optional<RefreshToken> findByRefreshToken(String token) {
+        return refreshTokenRepository.findByToken(token);
+    }
+
+    public void verifyRefreshTokenExpiration(RefreshToken token) {
+        if (token.getExpiryDate().isBefore(Instant.now())) {
+            refreshTokenRepository.delete(token);
+            throw new RuntimeException("Refresh token expired. Please login again.");
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.basicauth.model;
+package com.example.basicauth.dao.model;
 
 public enum UserRole {
     ROLE_USER,

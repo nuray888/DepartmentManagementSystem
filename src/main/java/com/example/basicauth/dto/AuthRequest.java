@@ -1,12 +1,10 @@
 package com.example.basicauth.dto;
-
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public record AuthRequest(
-        @Column(unique = true)
-        @NotNull @NotEmpty  String username,
-        String password
+        @Email @NotBlank @Size(min = 3,max = 30) String email,
+        @NotBlank String password
 ) {
 }

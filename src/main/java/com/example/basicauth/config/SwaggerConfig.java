@@ -7,23 +7,19 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
-
 @Configuration
 @OpenAPIDefinition(
-        info=@Info(
+        info = @Info(
                 title = "Employee Management",
-                description = "About Employee Managament",
-                version = "1.0",
-                contact=@Contact(
+                description = "About Employee Management",
+                version = "2.0",
+                contact = @Contact(
                         name = "Nuray Muxtarli",
                         email = "nuraymuxtarli@gmail.com"
                 )
         ),
-        security = @SecurityRequirement(name="BearerAuth")
-
-
+        security = @SecurityRequirement(name = "BearerAuth")
 )
-
 @SecurityScheme(
         name = "BearerAuth",
         type = SecuritySchemeType.HTTP,
@@ -32,4 +28,3 @@ import org.springframework.context.annotation.Configuration;
 )
 public class SwaggerConfig {
 }
-

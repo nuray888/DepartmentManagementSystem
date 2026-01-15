@@ -1,7 +1,7 @@
-package com.example.basicauth.repo;
+package com.example.basicauth.dao.repo;
 
-import com.example.basicauth.model.RefreshToken;
-import com.example.basicauth.model.UserInfo;
+import com.example.basicauth.dao.model.RefreshToken;
+import com.example.basicauth.dao.model.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

@@ -1,4 +1,4 @@
-package com.example.basicauth.service;
+package com.example.basicauth.service.impl;
 
 import com.example.basicauth.config.UserInfoDetails;
 import com.example.basicauth.dao.model.Department;
@@ -9,11 +9,11 @@ import com.example.basicauth.dao.model.UserInfo;
 import com.example.basicauth.dao.model.UserRole;
 import com.example.basicauth.dao.repo.RefreshTokenRepository;
 import com.example.basicauth.dao.repo.UserInfoRepository;
-import com.example.basicauth.exception.APIException;
-import com.example.basicauth.exception.InvalidCredentialsException;
-import com.example.basicauth.exception.ResourceNotFoundException;
-import com.example.basicauth.exception.UserBlockedException;
+import com.example.basicauth.exception.*;
 import com.example.basicauth.mapper.UserMapper;
+import com.example.basicauth.service.AuthService;
+import com.example.basicauth.service.EmailService;
+import com.example.basicauth.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,13 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthService {
+public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserInfoRepository repository;
     private final EmailService emailService;
@@ -83,6 +82,7 @@ public class AuthService {
                 .salary(request.salary())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
+                .isEmailVerified(false)
                 .department(department)
                 .role(UserRole.ROLE_USER).build();
         UserInfo save = repository.save(userInfo);
@@ -136,7 +136,7 @@ public class AuthService {
         UserInfo userInfo = repository.findByEmail(authRequest.email())
                 .orElseThrow(() -> new InvalidCredentialsException("Bu istifadəçi tapılmadı!"));
 
-        validateUser(authRequest, userInfo);
+        validateUser(userInfo);
 
         RefreshToken refreshToken = jwtService.createRefreshToken(authRequest.email());
         String accessToken = jwtService.generateAccessToken(authRequest.email());
@@ -175,16 +175,12 @@ public class AuthService {
 //                .build();
 //    }
 
-    private void validateUser(AuthRequest request, UserInfo user) {
+    private void validateUser( UserInfo user) {
         if (user.getIsDeleted())
             throw new ResourceNotFoundException("User is deleted");
 
         if (!user.getIsActive())
             throw new UserBlockedException("User is blocked");
-
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new InvalidCredentialsException("Password is wrong");
-        }
 
         if (!user.getIsEmailVerified()) {
             throw new InvalidCredentialsException("User is not verified");
@@ -195,19 +191,35 @@ public class AuthService {
 
 
 
-    @Transactional
-    public String changePassword(ChangePasswordDto request) {
-        UserInfo currentUser = getCurrentUser();
+//    @Transactional
+//    public String changePassword(ChangePasswordDto request) {
+//        UserInfo currentUser = getCurrentUser();
+//
+//        String newHashedPassword = passwordEncoder.encode(request.newPassword());
+//
+//        currentUser.setPassword(newHashedPassword);
+////        user.setPasswordLastChangedTime(LocalDateTime.now());
+//
+//        repository.save(currentUser);
+//
+//        return "Password changed";
+//    }
 
+    public String changePassword(ChangePasswordDto request) {
+        UserInfo user = getCurrentUser();
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("Old password is wrong");
+        }
         String newHashedPassword = passwordEncoder.encode(request.newPassword());
 
-        currentUser.setPassword(newHashedPassword);
+        user.setPassword(newHashedPassword);
 //        user.setPasswordLastChangedTime(LocalDateTime.now());
 
-        repository.save(currentUser);
+        repository.save(user);
 
         return "Password changed";
     }
+
     @Transactional
     public String forgotPassword(ForgotPasswordRequest request) {
         UserInfo user = repository.findByEmail(request.email()).orElseThrow();
@@ -219,6 +231,7 @@ public class AuthService {
         emailService.sendForgotPasswordEmail(request.email(),link);
         return "Reset password email sent";
     }
+    @Transactional
     public void sendVerification(String email) {
         UserInfo user = repository.findByEmail(email).orElseThrow();
         String verificationToken = UUID.randomUUID().toString();
@@ -256,10 +269,13 @@ public class AuthService {
     }
 
     public UserInfo getCurrentUser() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        return repository.findByEmail(userName)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserInfoDetails userDetails = (UserInfoDetails) auth.getPrincipal();
+
+        return repository.findByEmail(userDetails.getEmail())
+                .orElseThrow(()->new UserNotLoginException("User not login"));
     }
+
 
 
 }

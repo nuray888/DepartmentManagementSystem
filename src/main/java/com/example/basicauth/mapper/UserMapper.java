@@ -2,14 +2,14 @@ package com.example.basicauth.mapper;
 
 import com.example.basicauth.dto.UserRequest;
 import com.example.basicauth.dto.UserResponseDto;
-import com.example.basicauth.model.Department;
-import com.example.basicauth.model.UserInfo;
-import com.example.basicauth.repo.DepartmentRepository;
+import com.example.basicauth.dto.UserUpdateRequest;
+import com.example.basicauth.exception.ResourceNotFoundException;
+import com.example.basicauth.dao.model.Department;
+import com.example.basicauth.dao.model.UserInfo;
+import com.example.basicauth.dao.repo.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -38,8 +38,19 @@ public class UserMapper {
                 user.getSalary(),
                 user.getEmail(),
                 user.getDepartment() != null ? user.getDepartment().getId() : null,
-                user.getIsActive(),
-                user.getIsDeleted()
+                user.getIsActive() != null ? user.getIsActive() : false,
+                user.getIsDeleted(),
+                user.getRole()
         );
     }
+
+    public void updateUserFromDto(UserUpdateRequest dto, UserInfo user) {
+        if(dto.departmentId()!=null) departmentRepository.findById(dto.departmentId()).orElseThrow(()->new ResourceNotFoundException("Department not found with id " + dto.departmentId()));
+        if (dto.name() != null) user.setName(dto.name());
+        if (dto.surname() != null) user.setSurname(dto.surname());
+        if (dto.address() != null) user.setAddress(dto.address());
+        if (dto.salary() != null) user.setSalary(dto.salary());
+
+    }
+
 }
