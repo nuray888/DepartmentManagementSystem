@@ -20,7 +20,4 @@ public interface UserService {
     String deactivateUser(Long id);
     UserInfo findByEmail(String email);
 
-
-
-
 }

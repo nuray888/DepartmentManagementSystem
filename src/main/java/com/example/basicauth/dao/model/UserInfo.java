@@ -51,6 +51,7 @@ public class UserInfo {
     //email ucun
     Boolean isEmailVerified;
     String verificationToken;
+    LocalDateTime verificationTokenExpiry;
     //oauth2
     String googleId;
 

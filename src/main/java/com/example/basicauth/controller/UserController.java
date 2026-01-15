@@ -61,14 +61,14 @@ public class UserController {
     }
 
     @Operation(summary = "Activate User")
-    @PatchMapping("/activate'{userId}")
-    @PreAuthorize("hasRole('ROLE_MANAGER,ROLE_ADMIN')")
+    @PatchMapping("/activate/{userId}")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
     public ResponseEntity<String> activateUser(@PathVariable Long userId) {
         return ResponseEntity.ok(service.activateUser(userId));
     }
     @Operation(summary = "Deactivate user")
-    @PatchMapping("/deactivate'{userId}")
-    @PreAuthorize("hasRole('ROLE_MANAGER,ROLE_ADMIN')")
+    @PatchMapping("/deactivate/{userId}")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
     public ResponseEntity<String> deactivateUser(@PathVariable Long userId) {
         return ResponseEntity.ok(service.deactivateUser(userId));
     }

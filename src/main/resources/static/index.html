@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - User & Department Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app" class="app-container">
+    <!-- Authentication Pages -->
+    <div id="authPages" class="pages-container">
+        <!-- Login Page -->
+        <div id="loginPage" class="page active">
+            <div class="auth-container">
+                <div class="auth-box">
+                    <div class="auth-header">
+                        <h1>Welcome Back</h1>
+                        <p>Sign in to your account</p>
+                    </div>
+                    <form id="loginForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="loginEmail">Email Address</label>
+                            <input type="email" id="loginEmail" name="email" required placeholder="admin@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" name="password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                    </form>
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="#" onclick="showPage('signupPage')">Sign up</a></p>
+                        <p><a href="#" onclick="showPage('forgotPasswordPage')">Forgot password?</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Page -->
+        <div id="signupPage" class="page">
+            <div class="auth-container">
+                <div class="auth-box">
+                    <div class="auth-header">
+                        <h1>Create Account</h1>
+                        <p>Join our management system</p>
+                    </div>
+                    <form id="signupForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="signupFirstName">First Name</label>
+                            <input type="text" id="signupFirstName" name="firstName" required placeholder="John">
+                        </div>
+                        <div class="form-group">
+                            <label for="signupLastName">Last Name</label>
+                            <input type="text" id="signupLastName" name="lastName" required placeholder="Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="signupEmail">Email Address</label>
+                            <input type="email" id="signupEmail" name="email" required placeholder="john@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="signupPassword">Password</label>
+                            <input type="password" id="signupPassword" name="password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                    </form>
+                    <div class="auth-footer">
+                        <p>Already have an account? <a href="#" onclick="showPage('loginPage')">Sign in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forgot Password Page -->
+        <div id="forgotPasswordPage" class="page">
+            <div class="auth-container">
+                <div class="auth-box">
+                    <div class="auth-header">
+                        <h1>Reset Password</h1>
+                        <p>Enter your email to receive reset instructions</p>
+                    </div>
+                    <form id="forgotPasswordForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="forgotEmail">Email Address</label>
+                            <input type="email" id="forgotEmail" name="email" required placeholder="admin@company.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Send Reset Link</button>
+                    </form>
+                    <div class="auth-footer">
+                        <p><a href="#" onclick="showPage('loginPage')">Back to login</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Pages -->
+    <div id="dashboardPages" class="pages-container" style="display: none;">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Dashboard</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showDashboardPage('dashboardHome')">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showDashboardPage('usersPage')">
+                    <span class="nav-icon">👥</span>
+                    <span>Users</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showDashboardPage('departmentsPage')">
+                    <span class="nav-icon">🏢</span>
+                    <span>Departments</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showDashboardPage('profilePage')">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary btn-block" onclick="logout()">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div class="topbar-content">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <div class="topbar-actions">
+                        <span id="currentUser" class="user-info">User</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Home -->
+            <div id="dashboardHome" class="page-content active">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Total Users</p>
+                            <h3 id="totalUsers" class="stat-value">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🏢</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Total Departments</p>
+                            <h3 id="totalDepartments" class="stat-value">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✓</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Active Users</p>
+                            <h3 id="activeUsers" class="stat-value">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div id="usersPage" class="page-content">
+                <div class="page-header">
+                    <h2>User Management</h2>
+                    <button class="btn btn-primary" onclick="openUserModal()">Add New User</button>
+                </div>
+                <div class="table-container">
+                    <table id="usersTable" class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Departments Page -->
+            <div id="departmentsPage" class="page-content">
+                <div class="page-header">
+                    <h2>Department Management</h2>
+                    <button class="btn btn-primary" onclick="openDepartmentModal()">Add New Department</button>
+                </div>
+                <div class="table-container">
+                    <table id="departmentsTable" class="data-table">
+                        <thead>
+                        <tr>
+                            <th>Department Name</th>
+                            <th>Employees</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Profile/Settings Page -->
+            <div id="profilePage" class="page-content">
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h2>Account Settings</h2>
+                        <form id="profileForm" class="settings-form">
+                            <div class="form-group">
+                                <label for="profileEmail">Email</label>
+                                <input type="email" id="profileEmail" name="email" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileFirstName">First Name</label>
+                                <input type="text" id="profileFirstName" name="firstName">
+                            </div>
+                            <div class="form-group">
+                                <label for="profileLastName">Last Name</label>
+                                <input type="text" id="profileLastName" name="lastName">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-section">
+                        <h2>Change Password</h2>
+                        <form id="changePasswordForm" class="settings-form">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <input type="password" id="currentPassword" name="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" name="newPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- User Modal -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New User</h2>
+            <button class="modal-close" onclick="closeUserModal()">&times;</button>
+        </div>
+        <form id="userForm" class="modal-form">
+            <div class="form-group">
+                <label for="userName">Full Name</label>
+                <input type="text" id="userName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="userEmail">Email</label>
+                <input type="email" id="userEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="userRole">Role</label>
+                <select id="userRole" name="role" required>
+                    <option value="">Select Role</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="EMPLOYEE">Employee</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="userDepartment">Department</label>
+                <select id="userDepartment" name="department" required>
+                    <option value="">Select Department</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Department Modal -->
+<div id="departmentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Add New Department</h2>
+            <button class="modal-close" onclick="closeDepartmentModal()">&times;</button>
+        </div>
+        <form id="departmentForm" class="modal-form">
+            <div class="form-group">
+                <label for="deptName">Department Name</label>
+                <input type="text" id="deptName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="deptDescription">Description</label>
+                <textarea id="deptDescription" name="description" rows="4"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDepartmentModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div id="toast" class="toast"></div>
+
+<script src="api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+s

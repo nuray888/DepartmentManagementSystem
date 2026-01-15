@@ -53,13 +53,12 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/h2-console/**",
-                                "/forgotPassword",
-                                "/resetPassword",
                                 "/v1/departments/**",
                                 "/oauth2/**",
                                 "/api/v1/auth/send-verification-link",
+                                "/api/v1/auth/forgotPassword",
+                                "/api/v1/auth/resetPassword",
                                 "/api/v1/auth/verify-profile"
-
                         ).permitAll().anyRequest().authenticated()
 
                 )

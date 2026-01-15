@@ -1,16 +1,17 @@
 package com.example.basicauth.service.impl;
 
+import com.example.basicauth.config.UserInfoDetails;
+import com.example.basicauth.dao.model.Department;
+import com.example.basicauth.dao.model.UserInfo;
 import com.example.basicauth.dao.model.UserRole;
 import com.example.basicauth.dao.repo.DepartmentRepository;
-import com.example.basicauth.dto.UserRequest;
+import com.example.basicauth.dao.repo.UserInfoRepository;
 import com.example.basicauth.dto.UserResponseDto;
 import com.example.basicauth.dto.UserUpdateRequest;
 import com.example.basicauth.exception.NotValidException;
 import com.example.basicauth.exception.ResourceNotFoundException;
 import com.example.basicauth.exception.UserNotLoginException;
 import com.example.basicauth.mapper.UserMapper;
-import com.example.basicauth.dao.model.UserInfo;
-import com.example.basicauth.dao.repo.UserInfoRepository;
 import com.example.basicauth.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -36,23 +37,15 @@ public class UserServiceImpl implements UserService {
 //        return mapper.userToDto(userInfo);
 //    }
 
-    public void isValidManager(Long departmentId, UserInfo manager){
-        departmentRepository.findById(departmentId).orElseThrow(()->new ResourceNotFoundException("Department not found with id " + departmentId));
-        if(!manager.getDepartment().getId().equals(departmentId)){
-            throw  new NotValidException("You can't add user to another department");
-        };
-    }
 
     public List<UserResponseDto> getUsers() {
         List<UserInfo> all = repository.findAll();
         return all.stream().map(mapper::userToDto).collect(Collectors.toList());
     }
     public UserResponseDto getUser(Long id){
-        UserInfo userInfo = repository.findById(id).orElseThrow();
+        UserInfo userInfo = repository.findById(id).orElseThrow(()->new ResourceNotFoundException("User not found with id " + id));
         return mapper.userToDto(userInfo);
     }
-
-    //Helelik silmeyek tutaqki admin yeni user yarada bilir.
 
 
     public UserResponseDto updateUser(Long id, UserUpdateRequest userRequest) {
@@ -83,8 +76,10 @@ public class UserServiceImpl implements UserService {
                 || "anonymousUser".equals(authentication.getPrincipal()))
             throw new UserNotLoginException("İstifadəçi Login olmayıb");
 
-        return (UserInfo) authentication.getPrincipal();
+        UserInfoDetails userDetails = (UserInfoDetails) authentication.getPrincipal();
+        return userDetails.getUserInfo();
     }
+
 
     public String activateUser(Long id){
         UserInfo userInfo = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
@@ -94,11 +89,26 @@ public class UserServiceImpl implements UserService {
         return  "User marked as activated";
     }
     public String deactivateUser(Long id){
+        UserInfo currentUser=getCurrentUser();
         UserInfo userInfo = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
-        isValidManager(userInfo.getDepartment().getId(), getCurrentUser());
+        if(currentUser.getRole()!=UserRole.ROLE_ADMIN){
+            isValidManager(userInfo.getDepartment().getId(), getCurrentUser());
+        }
         userInfo.setIsActive(false);
         repository.save(userInfo);
         return   "User marked as deactivated";
+    }
+    public void isValidManager(Long departmentId, UserInfo manager) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id " + departmentId));
+
+        if (manager.getRole() == UserRole.ROLE_USER) {
+            throw new NotValidException("User cannot manage users");
+        }
+        if (department.getManager() == null ||
+                !department.getManager().getId().equals(manager.getId())) {
+            throw new NotValidException("You are not the manager of this department");
+        }
     }
 
     public UserInfo findByEmail(String email){

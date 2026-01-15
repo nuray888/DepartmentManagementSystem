@@ -4,13 +4,11 @@ import com.example.basicauth.dto.*;
 import com.example.basicauth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.constraints.NotBlank;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -31,8 +29,8 @@ public class AuthenticationController {
 
     @PostMapping("/send-verification-link")
     @Operation(summary = "Send verification link to user's email")
-    public ResponseEntity<ApiResponse<Void>> sendVerification(@RequestParam @NotBlank @Email String email) {
-        service.sendVerification(email);
+    public ResponseEntity<ApiResponse<Void>> sendVerification(@RequestBody VerificationRequest verificationRequest) {
+        service.sendVerification(verificationRequest);
         return ResponseEntity.ok(ApiResponse.build(
                 HttpStatus.OK,
                 "Verification link sent successfully",

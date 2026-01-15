@@ -3,6 +3,7 @@ package com.example.basicauth.filter;
 import com.example.basicauth.service.JwtService;
 
 import com.example.basicauth.service.UserInfoUserDetailsService;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +26,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserInfoUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
 
-        // 🔥 Bu endpointlər JWT istəməməlidir
         if (path.startsWith("/auth/login")
                 || path.startsWith("/auth/signUp")
                 || path.startsWith("/auth/verify-profile")

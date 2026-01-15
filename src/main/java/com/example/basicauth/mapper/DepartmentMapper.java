@@ -1,9 +1,9 @@
 package com.example.basicauth.mapper;
 
-import com.example.basicauth.dto.DepartmentDto;
 import com.example.basicauth.dao.model.Department;
 import com.example.basicauth.dao.model.UserInfo;
 import com.example.basicauth.dao.repo.UserInfoRepository;
+import com.example.basicauth.dto.DepartmentDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +21,15 @@ public class DepartmentMapper {
     }
 
     public Department dtoToDepartment(DepartmentDto departmentDto) {
-        UserInfo manager = userRepository.findById(departmentDto.managerId()).orElse(null);
+        UserInfo manager = null;
+        if (departmentDto.managerId() != null) {
+            manager = userRepository.findById(departmentDto.managerId()).orElse(null);
+        }
         return Department.builder()
                 .name(departmentDto.name())
                 .description(departmentDto.description())
-                .manager(manager).build();
+                .manager(manager)
+                .build();
     }
     public void updateDepartmentFromDto(DepartmentDto dto, Department department) {
         if (dto.name() != null) department.setName(dto.name());
@@ -34,7 +38,4 @@ public class DepartmentMapper {
             userRepository.findById(dto.managerId()).ifPresent(department::setManager);
         }
     }
-
-
-
 }

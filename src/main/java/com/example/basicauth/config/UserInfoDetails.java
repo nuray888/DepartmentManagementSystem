@@ -8,11 +8,13 @@ import java.util.Collection;
 import java.util.List;
 @Getter
 public class UserInfoDetails implements UserDetails {
+    private final UserInfo userInfo;
     private final String email;
     private final String password;
     private final List<GrantedAuthority> authorities;
 
     public UserInfoDetails(UserInfo userInfo) {
+        this.userInfo = userInfo;
         email = userInfo.getEmail();
         password = userInfo.getPassword();
         authorities = List.of(

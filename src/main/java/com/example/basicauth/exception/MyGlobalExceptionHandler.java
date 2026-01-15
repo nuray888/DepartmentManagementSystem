@@ -42,4 +42,10 @@ public class MyGlobalExceptionHandler {
         APIResponseDto apiResponseDto =new APIResponseDto(message,false);
         return new ResponseEntity<>(apiResponseDto, HttpStatus.FORBIDDEN);
     }
+    @ExceptionHandler(NotValidException.class)
+    public ResponseEntity<APIResponseDto> notValidExceptionHandler(NotValidException e) {
+        String message = e.getMessage();
+        APIResponseDto apiResponseDto =new APIResponseDto(message,false);
+        return new ResponseEntity<>(apiResponseDto, HttpStatus.FORBIDDEN);
+    }
 }

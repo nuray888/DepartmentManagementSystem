@@ -31,9 +31,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         if(userInfo.getRole().equals(UserRole.ROLE_MANAGER)) {
             userService.isValidManager(departmentId, userService.getCurrentUser());
         }
-        DepartmentDto department = findById(departmentId);
-        Department departmentEntity = mapper.dtoToDepartment(department);
-        Set<UserInfo> users = departmentEntity.getUsers();
+        Department department = repository.findById(departmentId).orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+        Set<UserInfo> users = department.getUsers();
         return users.stream().map(userMapper::userToDto).collect(Collectors.toSet());
     }
     public List<DepartmentDto> findAll() {
@@ -47,11 +46,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     public DepartmentDto create(DepartmentDto departmentDto) {
-        if(departmentDto.managerId()!=null){
-            UserResponseDto user = userService.getUser(departmentDto.managerId());
-
-
-        }
         Department department = mapper.dtoToDepartment(departmentDto);
         Department savedDepartment = repository.save(department);
         return mapper.departmentToDto(savedDepartment);

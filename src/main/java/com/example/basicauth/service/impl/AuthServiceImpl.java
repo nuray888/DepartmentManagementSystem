@@ -96,7 +96,6 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Verification token is invalid");
         }
         user.setIsEmailVerified(true);
-        user.setVerificationToken(null);
         repository.save(user);
         RefreshToken refreshToken = jwtService.createRefreshToken(user.getEmail());
         String jwt = jwtService.generateAccessToken(user.getEmail());
@@ -129,7 +128,6 @@ public class AuthServiceImpl implements AuthService {
                     new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password())
             );
         } catch (BadCredentialsException | UsernameNotFoundException ex) {
-            // Burada artıq sənin exception handler-a düşəcək
             throw new InvalidCredentialsException("Email və ya şifrə yanlışdır!");
         }
 
@@ -148,33 +146,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-
-//    public JwtResponse login(AuthRequest authRequest) {
-//        try{
-//        Authentication authentication = authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password())
-//        );}catch (InvalidCredentialsException ex){
-//            throw new InvalidCredentialsException(ex.getMessage());
-//        }
-//
-//        if (!authentication.isAuthenticated()) {
-//            throw new ResourceNotFoundException("Invalid user request!");
-//        }
-//        UserInfo userInfo = repository.findByEmail(authRequest.email()).orElseThrow(()->new InvalidCredentialsException("This user doesn't exist in db."));
-//        validateUser(authRequest, userInfo);
-//
-//        // Refresh token yarat
-//        RefreshToken refreshToken = jwtService.createRefreshToken(authRequest.email());
-//
-//        // Access token yarat
-//        String accessToken = jwtService.generateAccessToken(authRequest.email());
-//
-//        return JwtResponse.builder()
-//                .accessToken(accessToken)
-//                .token(refreshToken.getToken())
-//                .build();
-//    }
-
     private void validateUser( UserInfo user) {
         if (user.getIsDeleted())
             throw new ResourceNotFoundException("User is deleted");
@@ -189,21 +160,6 @@ public class AuthServiceImpl implements AuthService {
         repository.save(user);
     }
 
-
-
-//    @Transactional
-//    public String changePassword(ChangePasswordDto request) {
-//        UserInfo currentUser = getCurrentUser();
-//
-//        String newHashedPassword = passwordEncoder.encode(request.newPassword());
-//
-//        currentUser.setPassword(newHashedPassword);
-////        user.setPasswordLastChangedTime(LocalDateTime.now());
-//
-//        repository.save(currentUser);
-//
-//        return "Password changed";
-//    }
 
     public String changePassword(ChangePasswordDto request) {
         UserInfo user = getCurrentUser();
@@ -222,26 +178,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     public String forgotPassword(ForgotPasswordRequest request) {
-        UserInfo user = repository.findByEmail(request.email()).orElseThrow();
+        UserInfo user = repository.findByEmail(request.email()).orElseThrow(()-> new ResourceNotFoundException("User not found with email " + request.email()));
         String token = UUID.randomUUID().toString();
         user.setResetToken(token);
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
         repository.save(user);
-        String link = "http://localhost:8080/reset-password?token=" + token;
-        emailService.sendForgotPasswordEmail(request.email(),link);
+        emailService.sendForgotPasswordEmail(request.email(),token);
         return "Reset password email sent";
     }
-    @Transactional
-    public void sendVerification(String email) {
-        UserInfo user = repository.findByEmail(email).orElseThrow();
-        String verificationToken = UUID.randomUUID().toString();
-        String verificationLink="http://localhost:8080/verify-email?token=" + verificationToken;
-        user.setVerificationToken(verificationToken);
-        repository.save(user);
-        emailService.sendVerificationEmail(email,verificationLink);
-    }
-
-
     @Transactional
     public String resetPassword(ResetPasswordRequest request) {
         UserInfo user = repository.findByResetToken(request.token())
@@ -259,6 +203,18 @@ public class AuthServiceImpl implements AuthService {
         return "Password successfully changed";
     }
     @Transactional
+    public void sendVerification(VerificationRequest request) {
+        UserInfo user = repository.findByEmail(request.email()).orElseThrow();
+        String verificationToken = UUID.randomUUID().toString();
+        user.setVerificationToken(verificationToken);
+        user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        repository.save(user);
+        emailService.sendVerificationEmail(request.email(),verificationToken);
+    }
+
+
+
+    @Transactional
     public void logout(String refreshToken){
         log.info("HELLO");
         if(refreshToken==null){
@@ -275,7 +231,4 @@ public class AuthServiceImpl implements AuthService {
         return repository.findByEmail(userDetails.getEmail())
                 .orElseThrow(()->new UserNotLoginException("User not login"));
     }
-
-
-
 }
