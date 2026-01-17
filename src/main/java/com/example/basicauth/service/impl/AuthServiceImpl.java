@@ -3,12 +3,12 @@ package com.example.basicauth.service.impl;
 import com.example.basicauth.config.UserInfoDetails;
 import com.example.basicauth.dao.model.Department;
 import com.example.basicauth.dao.model.RefreshToken;
-import com.example.basicauth.dao.repo.DepartmentRepository;
-import com.example.basicauth.dto.*;
 import com.example.basicauth.dao.model.UserInfo;
 import com.example.basicauth.dao.model.UserRole;
+import com.example.basicauth.dao.repo.DepartmentRepository;
 import com.example.basicauth.dao.repo.RefreshTokenRepository;
 import com.example.basicauth.dao.repo.UserInfoRepository;
+import com.example.basicauth.dto.*;
 import com.example.basicauth.exception.*;
 import com.example.basicauth.mapper.UserMapper;
 import com.example.basicauth.service.AuthService;
@@ -16,6 +16,8 @@ import com.example.basicauth.service.EmailService;
 import com.example.basicauth.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,7 +27,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.authentication.AuthenticationManager;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -69,6 +71,10 @@ public class AuthServiceImpl implements AuthService {
 //        UserInfo save = repository.save(userInfo);
 //        return mapper.userToDto(save);
 //    }
+    @Value("${frontend.base.url}")
+    String frontendBaseUrl;
+//    String content = Files.readString(Paths.get("src/main/resources/templates/verification.html"));
+
 
     public UserResponseDto signup(SignUpRequest request) {
         if (repository.existsByEmail(request.email())) {
@@ -169,6 +175,9 @@ public class AuthServiceImpl implements AuthService {
         String newHashedPassword = passwordEncoder.encode(request.newPassword());
 
         user.setPassword(newHashedPassword);
+        if(!request.newPassword().equals(request.confirmPassword())) {
+         throw  new InvalidCredentialsException("Confirm password and new password do not match");
+        }
 //        user.setPasswordLastChangedTime(LocalDateTime.now());
 
         repository.save(user);
@@ -183,12 +192,14 @@ public class AuthServiceImpl implements AuthService {
         user.setResetToken(token);
         user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
         repository.save(user);
-        emailService.sendForgotPasswordEmail(request.email(),token);
+        String link=frontendBaseUrl+"api/v1/auth/forgotPassword?token="+token;
+//        emailService.sendHtml(request.email(),"Clink the link below so you can change password",);
+        emailService.sendMail(request.email(),"Reset Password","Your code:"+link);
         return "Reset password email sent";
     }
     @Transactional
-    public String resetPassword(ResetPasswordRequest request) {
-        UserInfo user = repository.findByResetToken(request.token())
+    public String resetPassword(String token,ResetPasswordRequest request) {
+        UserInfo user = repository.findByResetToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid or used token"));
 
         if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
@@ -209,7 +220,7 @@ public class AuthServiceImpl implements AuthService {
         user.setVerificationToken(verificationToken);
         user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(15));
         repository.save(user);
-        emailService.sendVerificationEmail(request.email(),verificationToken);
+        emailService.sendMail(request.email(),"Verification Token","Your code:"+verificationToken);
     }
 
 

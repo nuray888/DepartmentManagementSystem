@@ -10,7 +10,7 @@ public interface AuthService {
     String changePassword(ChangePasswordDto request);
     String forgotPassword(ForgotPasswordRequest request);
     void sendVerification(VerificationRequest email);
-    String resetPassword(ResetPasswordRequest request);
+    String resetPassword(String token,ResetPasswordRequest request);
     void logout(String refreshToken);
 
 }

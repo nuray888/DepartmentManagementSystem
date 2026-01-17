@@ -53,19 +53,22 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.refreshToken(refreshTokenRequest));
     }
 
-    @PatchMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordDto request) {
-        return ResponseEntity.ok(service.changePassword(request));
+    @PutMapping("/changePassword")
+    public ResponseEntity<ApiResponse<String>> changePassword(@Valid @RequestBody ChangePasswordDto request) {
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK,"Password changes successfully," ,
+                service.changePassword(request)
+                ));
     }
     @Operation(summary = "User forgot password for changing link will be send in gmail")
     @PostMapping("/forgotPassword")
-    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        return ResponseEntity.ok(service.forgotPassword(request));
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(ApiResponse.build(HttpStatus.OK,"Reset link sent",
+                service.forgotPassword(request)));
     }
     @Operation(summary = "User can change password")
     @PostMapping("/resetPassword")
-    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        return ResponseEntity.ok(service.resetPassword(request));
+    public ResponseEntity<String> resetPassword(@RequestParam String token,@Valid @RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(service.resetPassword(token,request));
     }
     @Operation(summary = "User logout")
     @PostMapping("/log-out")

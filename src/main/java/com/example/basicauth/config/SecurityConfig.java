@@ -16,6 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +38,7 @@ public class SecurityConfig {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
                 )
@@ -45,6 +51,11 @@ public class SecurityConfig {
 //                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/signUp",
                                 "/log-out",
@@ -57,8 +68,13 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/api/v1/auth/send-verification-link",
                                 "/api/v1/auth/forgotPassword",
+                                "/api/v1/auth/resetPassword/**",
+                                "/req/reset-password",
+                                "/req/reset-password/**",
                                 "/api/v1/auth/resetPassword",
-                                "/api/v1/auth/verify-profile"
+                                "/api/v1/auth/verify-profile",
+                                "/api/v1/departments/**",
+                                "/v1/departments/**"
                         ).permitAll().anyRequest().authenticated()
 
                 )
@@ -86,4 +102,20 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:8080");
+        configuration.addAllowedOrigin("http://localhost:63342");
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+
+    }
+
+
 }
