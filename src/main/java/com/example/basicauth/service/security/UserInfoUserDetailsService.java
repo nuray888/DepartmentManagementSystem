@@ -1,4 +1,4 @@
-package com.example.basicauth.service;
+package com.example.basicauth.service.security;
 
 import com.example.basicauth.config.UserInfoDetails;
 import com.example.basicauth.dao.model.UserInfo;

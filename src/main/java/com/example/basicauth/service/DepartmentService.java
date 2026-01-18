@@ -1,7 +1,7 @@
 package com.example.basicauth.service;
 
-import com.example.basicauth.dto.DepartmentDto;
-import com.example.basicauth.dto.UserResponseDto;
+import com.example.basicauth.dto.department.DepartmentDto;
+import com.example.basicauth.dto.user.UserResponseDto;
 
 import java.util.List;
 import java.util.Set;

@@ -21,6 +21,5 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
 
 
     UserInfo findByVerificationToken(String token);
-
     boolean existsByEmail(@NotBlank @Email String email);
 }

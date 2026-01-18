@@ -1,6 +1,7 @@
 package com.example.basicauth.service;
 
-import com.example.basicauth.dto.*;
+import com.example.basicauth.dto.auth.*;
+import com.example.basicauth.dto.user.UserResponseDto;
 
 public interface AuthService {
     UserResponseDto signup(SignUpRequest request);
@@ -10,7 +11,7 @@ public interface AuthService {
     String changePassword(ChangePasswordDto request);
     String forgotPassword(ForgotPasswordRequest request);
     void sendVerification(VerificationRequest email);
-    String resetPassword(String token,ResetPasswordRequest request);
+    String resetPassword(String token, ResetPasswordRequest request);
     void logout(String refreshToken);
 
 }

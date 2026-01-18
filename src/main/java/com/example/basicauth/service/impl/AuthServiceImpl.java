@@ -8,12 +8,12 @@ import com.example.basicauth.dao.model.UserRole;
 import com.example.basicauth.dao.repo.DepartmentRepository;
 import com.example.basicauth.dao.repo.RefreshTokenRepository;
 import com.example.basicauth.dao.repo.UserInfoRepository;
-import com.example.basicauth.dto.*;
+import com.example.basicauth.dto.auth.*;
+import com.example.basicauth.dto.user.UserResponseDto;
 import com.example.basicauth.exception.*;
 import com.example.basicauth.mapper.UserMapper;
 import com.example.basicauth.service.AuthService;
-import com.example.basicauth.service.EmailService;
-import com.example.basicauth.service.JwtService;
+import com.example.basicauth.service.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +37,7 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserInfoRepository repository;
-    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
     private final RefreshTokenRepository refreshTokenRepository;
     private final DepartmentRepository departmentRepository;
     private final AuthenticationManager authenticationManager;
@@ -194,11 +194,11 @@ public class AuthServiceImpl implements AuthService {
         repository.save(user);
         String link=frontendBaseUrl+"api/v1/auth/forgotPassword?token="+token;
 //        emailService.sendHtml(request.email(),"Clink the link below so you can change password",);
-        emailService.sendMail(request.email(),"Reset Password","Your code:"+link);
+        emailServiceImpl.sendMail(request.email(),"Reset Password","Your code:"+link);
         return "Reset password email sent";
     }
     @Transactional
-    public String resetPassword(String token,ResetPasswordRequest request) {
+    public String resetPassword(String token, ResetPasswordRequest request) {
         UserInfo user = repository.findByResetToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid or used token"));
 
@@ -220,7 +220,7 @@ public class AuthServiceImpl implements AuthService {
         user.setVerificationToken(verificationToken);
         user.setVerificationTokenExpiry(LocalDateTime.now().plusMinutes(15));
         repository.save(user);
-        emailService.sendMail(request.email(),"Verification Token","Your code:"+verificationToken);
+        emailServiceImpl.sendMail(request.email(),"Verification Token","Your code:"+verificationToken);
     }
 
 

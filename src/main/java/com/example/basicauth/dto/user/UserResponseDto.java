@@ -1,4 +1,4 @@
-package com.example.basicauth.dto;
+package com.example.basicauth.dto.user;
 
 import com.example.basicauth.dao.model.UserRole;
 

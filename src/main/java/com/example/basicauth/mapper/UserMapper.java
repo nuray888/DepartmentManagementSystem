@@ -1,8 +1,8 @@
 package com.example.basicauth.mapper;
 
-import com.example.basicauth.dto.UserRequest;
-import com.example.basicauth.dto.UserResponseDto;
-import com.example.basicauth.dto.UserUpdateRequest;
+import com.example.basicauth.dto.user.UserRequest;
+import com.example.basicauth.dto.user.UserResponseDto;
+import com.example.basicauth.dto.user.UserUpdateRequest;
 import com.example.basicauth.exception.ResourceNotFoundException;
 import com.example.basicauth.dao.model.Department;
 import com.example.basicauth.dao.model.UserInfo;

@@ -1,4 +1,4 @@
-package com.example.basicauth.dto;
+package com.example.basicauth.dto.department;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

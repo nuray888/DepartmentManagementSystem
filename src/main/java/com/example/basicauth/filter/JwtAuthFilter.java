@@ -1,8 +1,8 @@
 package com.example.basicauth.filter;
 
-import com.example.basicauth.service.JwtService;
+import com.example.basicauth.service.security.JwtService;
 
-import com.example.basicauth.service.UserInfoUserDetailsService;
+import com.example.basicauth.service.security.UserInfoUserDetailsService;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,13 +29,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
 
-        if (path.startsWith("/auth/login")
-                || path.startsWith("/auth/signUp")
-                || path.startsWith("/auth/verify-profile")
-                || path.startsWith("/auth/refresh-token")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+//        if (path.startsWith("/auth/login")
+//                || path.startsWith("/auth/signUp")
+//                || path.startsWith("/auth/verify-profile")
+//                || path.startsWith("/auth/refresh-token")) {
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         String authHeader = request.getHeader("Authorization");
         String token = null;

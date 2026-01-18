@@ -1,8 +1,9 @@
 package com.example.basicauth.controller;
 
 import com.example.basicauth.dao.model.UserRole;
-import com.example.basicauth.dto.UserResponseDto;
-import com.example.basicauth.dto.UserUpdateRequest;
+import com.example.basicauth.dto.user.UserPageResponse;
+import com.example.basicauth.dto.user.UserResponseDto;
+import com.example.basicauth.dto.user.UserUpdateRequest;
 import com.example.basicauth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -10,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -27,9 +26,12 @@ public class UserController {
 //    }
     @Operation(summary = "Shows all users")
     @GetMapping("/all")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-        return ResponseEntity.ok(service.getUsers());
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<UserPageResponse> getAllUsers(@RequestParam(defaultValue = "0") Integer pageNumber,
+                                        @RequestParam(defaultValue = "10") Integer pageSize,
+                                        @RequestParam(defaultValue = "id") String sortBy,
+                                        @RequestParam(defaultValue = "desc") String orderBy) {
+        return ResponseEntity.ok(service.getUsers(pageNumber,pageSize,sortBy,orderBy));
     }
 
     @Operation(summary = "Show user by id")

@@ -6,20 +6,24 @@ import com.example.basicauth.dao.model.UserInfo;
 import com.example.basicauth.dao.model.UserRole;
 import com.example.basicauth.dao.repo.DepartmentRepository;
 import com.example.basicauth.dao.repo.UserInfoRepository;
-import com.example.basicauth.dto.UserResponseDto;
-import com.example.basicauth.dto.UserUpdateRequest;
+import com.example.basicauth.dto.user.UserPageResponse;
+import com.example.basicauth.dto.user.UserResponseDto;
+import com.example.basicauth.dto.user.UserUpdateRequest;
 import com.example.basicauth.exception.NotValidException;
 import com.example.basicauth.exception.ResourceNotFoundException;
 import com.example.basicauth.exception.UserNotLoginException;
 import com.example.basicauth.mapper.UserMapper;
 import com.example.basicauth.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +31,6 @@ public class UserServiceImpl implements UserService {
     private final UserInfoRepository repository;
     private final UserMapper mapper;
     private final DepartmentRepository departmentRepository;
-
 //    public UserResponseDto createUser(UserRequest userRequest) {
 //        if(getCurrentUser().getRole().equals(UserRole.ROLE_MANAGER)){
 //            isValidManager(userRequest.departmentId(),getCurrentUser());
@@ -38,10 +41,20 @@ public class UserServiceImpl implements UserService {
 //    }
 
 
-    public List<UserResponseDto> getUsers() {
-        List<UserInfo> all = repository.findAll();
-        return all.stream().map(mapper::userToDto).collect(Collectors.toList());
+    public UserPageResponse getUsers(Integer pageNumber,Integer pageSize,String sortBy,String orderBy) {
+        Sort sortAndOrder=orderBy.equalsIgnoreCase("desc")?
+                Sort.by(sortBy).descending():Sort.by(sortBy).ascending();
+
+        Pageable pageDetails=PageRequest.of(pageNumber,pageSize,sortAndOrder);
+        Page<UserInfo> userPage = repository.findAll(pageDetails);
+        List<UserInfo> content = userPage.getContent();
+        List<UserResponseDto> collect = content.stream().map(mapper::userToDto).toList();
+        return new UserPageResponse(
+                collect,pageNumber,pageSize,userPage.getTotalElements(),userPage.getTotalPages(), userPage.isLast()
+        );
     }
+
+
     public UserResponseDto getUser(Long id){
         UserInfo userInfo = repository.findById(id).orElseThrow(()->new ResourceNotFoundException("User not found with id " + id));
         return mapper.userToDto(userInfo);

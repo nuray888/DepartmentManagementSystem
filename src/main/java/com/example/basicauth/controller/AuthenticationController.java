@@ -1,6 +1,8 @@
 package com.example.basicauth.controller;
 
-import com.example.basicauth.dto.*;
+import com.example.basicauth.dto.ApiResponse;
+import com.example.basicauth.dto.auth.*;
+import com.example.basicauth.dto.user.UserResponseDto;
 import com.example.basicauth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -8,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
@@ -79,18 +82,18 @@ public class AuthenticationController {
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping("/login/google")
-//    @ResponseBody
-//    public String user(OAuth2AuthenticationToken principal) {
-//        return principal.getPrincipal().getAttribute("name");
-////        return "Nuray Muxtarli";
-//    }
+    @GetMapping("/login/google")
+    @ResponseBody
+    public String user(OAuth2AuthenticationToken principal) {
+        return principal.getPrincipal().getAttribute("name");
+//        return "Nuray Muxtarli";
+    }
 
 
-//    @GetMapping("/success")
-//    public String dashboard() {
-//        return "OAuth2 login successful!";
-//    }
+    @GetMapping("/success")
+    public String dashboard() {
+        return "OAuth2 login successful!";
+    }
 
 
 }

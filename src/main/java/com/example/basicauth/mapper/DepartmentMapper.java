@@ -3,7 +3,7 @@ package com.example.basicauth.mapper;
 import com.example.basicauth.dao.model.Department;
 import com.example.basicauth.dao.model.UserInfo;
 import com.example.basicauth.dao.repo.UserInfoRepository;
-import com.example.basicauth.dto.DepartmentDto;
+import com.example.basicauth.dto.department.DepartmentDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -1,7 +1,7 @@
 package com.example.basicauth.controller;
 
-import com.example.basicauth.dto.DepartmentDto;
-import com.example.basicauth.dto.UserResponseDto;
+import com.example.basicauth.dto.department.DepartmentDto;
+import com.example.basicauth.dto.user.UserResponseDto;
 import com.example.basicauth.service.DepartmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

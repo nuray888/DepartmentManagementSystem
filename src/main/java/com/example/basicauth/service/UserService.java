@@ -2,14 +2,13 @@ package com.example.basicauth.service;
 
 import com.example.basicauth.dao.model.UserInfo;
 import com.example.basicauth.dao.model.UserRole;
-import com.example.basicauth.dto.UserResponseDto;
-import com.example.basicauth.dto.UserUpdateRequest;
-
-import java.util.List;
+import com.example.basicauth.dto.user.UserPageResponse;
+import com.example.basicauth.dto.user.UserResponseDto;
+import com.example.basicauth.dto.user.UserUpdateRequest;
 
 public interface UserService {
 //    UserResponseDto createUser(UserRequest userRequest);
-    List<UserResponseDto> getUsers();
+UserPageResponse getUsers(Integer pageNumber, Integer pageSize, String sortBy, String orderBy);
     UserResponseDto getUser(Long id);
     UserResponseDto updateUser(Long id, UserUpdateRequest userRequest);
     String deleteUser(Long id);
