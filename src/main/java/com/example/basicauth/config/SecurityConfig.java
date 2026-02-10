@@ -3,6 +3,7 @@ package com.example.basicauth.config;
 import com.example.basicauth.filter.JwtAuthFilter;
 import com.example.basicauth.service.oauth2.CustomOAuth2UserService;
 import com.example.basicauth.service.oauth2.OAuth2LoginSuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,7 +51,12 @@ public class SecurityConfig {
                                 .oidcUserService(oAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
+
                 )
+                .exceptionHandling(ex -> ex   // 👈 BURAYA
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
